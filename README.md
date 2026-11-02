@@ -127,3 +127,17 @@ The integration design uses **Adapter** (provider APIs implement one job-provide
 ## Boundaries
 
 The live job-board integrations include Greenhouse and Lever public APIs plus bounded public career-page discovery through Brave Search. Other boards require permitted official feeds/adapters. Area search is not exhaustive and only accepts structured postings from matching employer domains or recognized ATS hosts; it honors robots.txt and does not use authenticated portal access. Gmail credentials are used only with Gmail. Fit scoring is a transparent keyword heuristic, not an LLM assessment. Discovery runs on demand; only already-applied jobs are monitored in the background. Résumés are text-extracted, not semantically interpreted. Application readiness checks are implemented, but application preparation/submission through external portals is not; no Playwright driver exists. There is no user authentication or multi-user hosting, so do not treat this development server as a production deployment.
+
+
+## Deployment (Railway)
+
+Pushes to `main` deploy automatically through Railway's GitHub integration (CI runs separately in GitHub Actions). One Railway project, two services:
+
+| Service | Root dir | Contains | Storage |
+| --- | --- | --- | --- |
+| `careerpilot-ai` (public) | `/` | Go API + built React console, one container | SQLite in `/data` volume |
+| `careerpilot-cortex` (private) | `/cortex` | Python AI service (FastAPI, ChromaDB, Playwright) | ChromaDB in `/data` volume |
+
+The browser talks only to `careerpilot-ai`. It serves the UI and `/api/*`, and calls cortex over Railway's private network via `CORTEX_URL=http://careerpilot-cortex.railway.internal:8890`. Cortex has no public domain. Each service has its own `railway.json` with watch patterns, so a change only rebuilds the service it affects.
+
+SQLite and ChromaDB live on single-writer volumes: keep each service at one replica. Set `CORTEX_LLM` plus the matching API key on cortex for real model output (default is template mode).

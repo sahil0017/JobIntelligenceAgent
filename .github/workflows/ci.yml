@@ -46,17 +46,3 @@ jobs:
       - uses: actions/checkout@v4
       - run: docker build -t careerpilot .
 
-  deploy:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [api, console, cortex, docker]
-    runs-on: ubuntu-latest
-    concurrency: railway-deploy
-    env:
-      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-    steps:
-      - uses: actions/checkout@v4
-      - run: npm install -g @railway/cli
-      - name: Deploy platform
-        run: railway up --ci --service careerpilot-ai
-      - name: Deploy cortex
-        run: railway up cortex --path-as-root --ci --service careerpilot-cortex
