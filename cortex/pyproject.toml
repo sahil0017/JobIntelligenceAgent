@@ -1,0 +1,9 @@
+[project]
+name = "careerpilot-cortex"
+version = "0.1.0"
+description = "Agentic AI orchestration and analysis service for CareerPilot"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

@@ -1,0 +1,4 @@
+-r requirements.txt
+# Optional deep-learning engine: enable with CORTEX_EMBEDDER=sentence-transformers
+sentence-transformers>=3.0
+torch>=2.4

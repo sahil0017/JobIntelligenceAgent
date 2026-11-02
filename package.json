@@ -1,0 +1,24 @@
+{
+  "name": "careerpilot-ai",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "concurrently -k -n api,web,ai \"npm:dev:api\" \"npm:dev:web\" \"npm:dev:ai\"",
+    "dev:api": "go run ./platform/cmd/careerpilot",
+    "dev:web": "npm --prefix console run dev",
+    "dev:ai": "if [ -x cortex/.venv/bin/python ]; then cd cortex && set -a && { [ ! -f .env ] || . ./.env; } && set +a && .venv/bin/python -m uvicorn cortex.server:app --host 127.0.0.1 --port 8890; else echo 'AI service not installed. Run: npm run setup:ai'; tail -f /dev/null; fi",
+    "setup:ai": "bash scripts/setup-ai.sh",
+    "test:ai": "cd cortex && .venv/bin/python -m pytest -q",
+    "build": "npm --prefix console run build && go build ./...",
+    "test": "npm run test:api && npm run typecheck && npm run test:e2e",
+    "test:api": "go vet ./... && go test -race ./...",
+    "typecheck": "npm --prefix console run typecheck",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "e2e:install": "playwright install chromium"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "concurrently": "^9.1.0"
+  }
+}

@@ -1,0 +1,25 @@
+import {
+  ChevronDown,
+  CircleHelp,
+  Filter,
+  Globe2,
+  MapPin,
+  Plus,
+  Search,
+  Sparkles,
+} from "lucide-react";
+import { JobCard } from "../../components/JobCard";
+import { CareerSource, Job, JobStatus } from "../../types";
+
+export function JobMatches({ jobs, search, setSearch, jobFilter, setJobFilter, onUpdateStatus, onRunDiscovery, discoveryRunning, onAddJob, onOpenDetails, onNotify, sourceError, sources, agentRunning, activeArea, includeRemoteListings, remoteRegion, checkedAreaSources, onClearArea, onManageSources, onOpenAreaSearch }: {
+  jobs: Job[]; search: string; setSearch: (value: string) => void; jobFilter: string; setJobFilter: (value: string) => void; onUpdateStatus: (id: string, status: JobStatus) => void; onRunDiscovery: () => void; discoveryRunning: boolean; onAddJob: () => void; onOpenDetails: (job: Job) => void; onNotify: (message: string) => void; sourceError: string; sources: CareerSource[]; agentRunning: boolean; activeArea: string; includeRemoteListings: boolean; remoteRegion: string; checkedAreaSources: number; onClearArea: () => void; onManageSources: () => void; onOpenAreaSearch: () => void;
+}) {
+  return <>
+    <div className="welcome-row page-title-row"><div><div className="eyebrow"><span className="eyebrow-line" /> OPPORTUNITY FEED</div><h1>{activeArea ? `Jobs near ${activeArea}` : "Job matches"}</h1><p className="page-subtitle">{activeArea ? "Public listings found on verified employer career pages." : "Current listings fetched from the public Greenhouse and Lever boards you connect."}</p></div><div className="title-actions"><button className="button button-secondary" onClick={onManageSources}><Globe2 size={15} /> Sources ({sources.length})</button><button className="button button-secondary" onClick={onAddJob}><Plus size={16} /> Add a job</button><button className="button button-primary" onClick={onRunDiscovery} disabled={(!agentRunning && !activeArea) || discoveryRunning}><Sparkles size={16} />{discoveryRunning ? "Scanning..." : activeArea ? "Refresh area search" : "Find new jobs"}</button></div></div>
+    {sourceError && <div className="source-error"><CircleHelp size={15} /><span>{sourceError}</span><button onClick={activeArea ? onOpenAreaSearch : onManageSources}>{activeArea ? "Change search area" : "Manage sources"}</button></div>}
+    {activeArea && <div className="area-filter-notice"><MapPin size={15} /><span>Showing verified public listings in <strong>{activeArea}</strong>{includeRemoteListings && remoteRegion ? `, including remote roles open to ${remoteRegion}` : ""}. Brave Search found {checkedAreaSources} public career page{checkedAreaSources === 1 ? "" : "s"} to check; results are not exhaustive.</span><button onClick={onClearArea}>Clear area</button></div>}
+    <div className="filter-toolbar"><label className="search-field"><Search size={17} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search role, company, or skill" /><kbd>⌘ K</kbd></label><div className="filter-select-wrap"><Filter size={15} /><select value={jobFilter} onChange={(event) => setJobFilter(event.target.value)} aria-label="Filter job matches"><option>All matches</option><option>90%+ match</option><option>Review</option><option>Saved</option><option>Applied</option></select><ChevronDown size={13} /></div><button className={`filter-chip ${jobFilter === "90%+ match" ? "selected" : ""}`} onClick={() => setJobFilter(jobFilter === "90%+ match" ? "All matches" : "90%+ match")}>Strong fit <span>{jobFilter === "90%+ match" ? "×" : "+"}</span></button><span className="results-count">{jobs.length} opportunities</span></div>
+    {jobs.length ? <div className="job-results-grid">{jobs.map((job) => <JobCard key={job.id} job={job} onUpdateStatus={onUpdateStatus} onNotify={onNotify} onOpenDetails={onOpenDetails} />)}</div> : <div className="empty-state"><div className="empty-state-icon"><Search size={22} /></div><h2>{search ? "No matches found" : activeArea ? "No verified openings found" : "No live listings yet"}</h2><p>{search ? "Try adjusting your search or filters." : activeArea ? "Try a nearby city or broaden the target role in your profile. Some career sites do not publish structured listings or allow automated access." : "Connect a public Greenhouse or Lever board, then fetch its current openings."}</p><div className="empty-actions">{search && <button className="button button-secondary" onClick={() => { setSearch(""); setJobFilter("All matches"); }}>Clear filters</button>}<button className="button button-primary" onClick={activeArea ? onOpenAreaSearch : onManageSources}>{activeArea ? "Change search area" : "Manage career sources"}</button></div></div>}
+    <div className="feed-disclaimer"><Sparkles size={15} /> {activeArea ? "Listings are verified public pages discovered for this search. Fit scores use profile and resume keyword overlap locally." : "Listings come from the public career boards you configure. Fit scores use profile keyword overlap, not AI."} <button onClick={activeArea ? onOpenAreaSearch : onManageSources}>{activeArea ? "Search another area" : "Manage sources"}</button></div>
+  </>;
+}

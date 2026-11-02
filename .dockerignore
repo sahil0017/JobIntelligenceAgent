@@ -1,0 +1,8 @@
+node_modules
+.data
+.e2e-data
+.git
+cortex
+e2e
+test-results
+playwright-report

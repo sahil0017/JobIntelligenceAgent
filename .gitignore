@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.DS_Store
+.data/
+.e2e-data/
+test-results/
+playwright-report/
+.venv/
+__pycache__/
+.pytest_cache/
+.env
+cortex/data/
