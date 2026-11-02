@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -29,7 +30,7 @@ func run() error {
 
 	host, port := "127.0.0.1", os.Getenv("API_PORT")
 	if railwayPort := os.Getenv("PORT"); railwayPort != "" {
-		host, port = "0.0.0.0", railwayPort
+		host, port = "::", railwayPort
 	}
 	if port == "" {
 		port = "8787"
@@ -39,7 +40,7 @@ func run() error {
 	}
 
 	server := &http.Server{
-		Addr:              host + ":" + port,
+		Addr:              net.JoinHostPort(host, port),
 		Handler:           handler,
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       15 * time.Second,

@@ -131,13 +131,19 @@ The live job-board integrations include Greenhouse and Lever public APIs plus bo
 
 ## Deployment (Railway)
 
-Pushes to `main` deploy automatically through Railway's GitHub integration (CI runs separately in GitHub Actions). One Railway project, two services:
+Pushes to `main` deploy automatically through Railway's GitHub integration (CI runs separately in GitHub Actions). One Railway project, four services, each with its own root directory, `railway.json` and watch patterns, so a change only rebuilds the service it affects:
 
-| Service | Root dir | Contains | Storage |
-| --- | --- | --- | --- |
-| `careerpilot-ai` (public) | `/` | Go API + built React console, one container | SQLite in `/data` volume |
-| `careerpilot-cortex` (private) | `/cortex` | Python AI service (FastAPI, ChromaDB, Playwright) | ChromaDB in `/data` volume |
+| Service | Root dir | Role | Public | Storage |
+| --- | --- | --- | --- | --- |
+| `careerpilot-web` | `/console` | Frontend: nginx serves the React build and proxies `/api/*` | Yes | none |
+| `careerpilot-api` | `/` | Backend: Go API | No | SQLite in `/data` volume |
+| `careerpilot-cortex` | `/cortex` | Backend: Python AI (FastAPI, ChromaDB, Playwright) | No | ChromaDB in `/data` volume |
+| `ollama` | `/ollama` | LLM server (CPU), pulls `OLLAMA_MODEL` on boot | No | models in `/root/.ollama` volume |
 
-The browser talks only to `careerpilot-ai`. It serves the UI and `/api/*`, and calls cortex over Railway's private network via `CORTEX_URL=http://careerpilot-cortex.railway.internal:8890`. Cortex has no public domain. Each service has its own `railway.json` with watch patterns, so a change only rebuilds the service it affects.
+```
+browser -> careerpilot-web -> careerpilot-api -> careerpilot-cortex
+                                   |                   |
+                                   +------> ollama <---+
+```
 
-SQLite and ChromaDB live on single-writer volumes: keep each service at one replica. Set `CORTEX_LLM` plus the matching API key on cortex for real model output (default is template mode).
+Services talk over Railway's private network (`<service>.railway.internal`) using these variables: `BACKEND_URL` (web), `CORTEX_URL` and `OLLAMA_URL` (api), `OLLAMA_URL` with `CORTEX_LLM=ollama` (cortex). Everything listens on `::` because private networking is IPv6. Keep SQLite and ChromaDB services at one replica. Change the model by setting `OLLAMA_MODEL` on `ollama`, `careerpilot-api` and `careerpilot-cortex`; it must support tool calls.

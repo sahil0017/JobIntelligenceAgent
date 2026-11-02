@@ -3,19 +3,7 @@
   "build": {
     "builder": "DOCKERFILE",
     "dockerfilePath": "Dockerfile",
-    "watchPatterns": [
-      "/console/**",
-      "/platform/**",
-      "/intelligence/**",
-      "/contracts/**",
-      "/go.mod",
-      "/go.sum",
-      "/Dockerfile"
-    ]
+    "watchPatterns": ["/platform/**", "/intelligence/**", "/contracts/**", "/go.mod", "/go.sum", "/Dockerfile"]
   },
-  "deploy": {
-    "restartPolicyType": "ON_FAILURE",
-    "restartPolicyMaxRetries": 5,
-    "healthcheckPath": "/api/health"
-  }
+  "deploy": { "healthcheckPath": "/api/health", "restartPolicyType": "ON_FAILURE", "restartPolicyMaxRetries": 5 }
 }
