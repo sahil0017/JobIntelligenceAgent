@@ -140,10 +140,6 @@ Pushes to `main` deploy automatically through Railway's GitHub integration (CI r
 | `careerpilot-cortex` | `/cortex` | Backend: Python AI (FastAPI, ChromaDB, Playwright) | No | ChromaDB in `/data` volume |
 | `ollama` | `/ollama` | LLM server (CPU), pulls `OLLAMA_MODEL` on boot | No | models in `/root/.ollama` volume |
 
-```
-browser -> careerpilot-web -> careerpilot-api -> careerpilot-cortex
-                                   |                   |
-                                   +------> ollama <---+
-```
+![Animated architecture: GitHub push deploys to four Railway services](docs/architecture.svg)
 
-Services talk over Railway's private network (`<service>.railway.internal`) using these variables: `BACKEND_URL` (web), `CORTEX_URL` and `OLLAMA_URL` (api), `OLLAMA_URL` with `CORTEX_LLM=ollama` (cortex). Everything listens on `::` because private networking is IPv6. Keep SQLite and ChromaDB services at one replica. Change the model by setting `OLLAMA_MODEL` on `ollama`, `careerpilot-api` and `careerpilot-cortex`; it must support tool calls.
+Services talk over Railway's private network (`<service>.railway.internal`) using these variables: `BACKEND_URL` (web), `CORTEX_URL` and `OLLAMA_URL` (api); `BACKEND_URL` uses `${{careerpilot-api.RAILWAY_PRIVATE_DOMAIN}}` because a renamed service keeps its original private hostname; the API runs with `PORT=8787`, `OLLAMA_URL` with `CORTEX_LLM=ollama` (cortex). Everything listens on `::` because private networking is IPv6. Keep SQLite and ChromaDB services at one replica. Change the model by setting `OLLAMA_MODEL` on `ollama`, `careerpilot-api` and `careerpilot-cortex`; it must support tool calls.
